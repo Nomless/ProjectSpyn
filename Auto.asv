@@ -1,6 +1,7 @@
 TOUCH_PORT = 1;
 ULTRASONIC_PORT = 4;
 COLOR_PORT = 3;
+GYRO_PORT = 2;
 LEFT_DRIVE_MOTOR = 'D';
 RIGHT_DRIVE_MOTOR = 'C';
 ARM_MOTOR = 'B';
@@ -11,7 +12,7 @@ TURN_SPEED = 45;
 touched = false;
 completed_check = false;
 
-brick.GyroCalibrate(GYRO_PORT);
+
 
 brick.beep();
 
