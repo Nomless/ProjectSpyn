@@ -11,8 +11,6 @@ TURN_SPEED = 45;
 touched = false;
 completed_check = false;
 
-brick.GyroCalibrate(GYRO_PORT);
-
 brick.beep();
 
 brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
