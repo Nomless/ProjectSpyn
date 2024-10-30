@@ -64,7 +64,7 @@ while 1
         % move left
         brick.MoveMotor(LEFT_DRIVE_MOTOR, -TURN_SPEED);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, TURN_SPEED);
-        pause(0.8);
+        pause(1.0);
         brick.StopMotor(LEFT_DRIVE_MOTOR);
         brick.StopMotor(RIGHT_DRIVE_MOTOR);
         pause(0.5);
