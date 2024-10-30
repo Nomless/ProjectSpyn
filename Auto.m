@@ -12,7 +12,7 @@ ARM_MOTOR = 'B';
 % 5 - Red
 % 6 - White
 % 7 - Brown
-STOP_COLOR = 5;
+STOP_COLOR = 4;
 
 DRIVE_SPEED = 60;
 LEFT_OFFSET = 5;
@@ -45,7 +45,7 @@ while 1
         % move right
         brick.MoveMotor(LEFT_DRIVE_MOTOR, TURN_SPEED);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, -TURN_SPEED);
-        pause(0.9);
+        pause(1.05);
         brick.StopMotor(LEFT_DRIVE_MOTOR);
         brick.StopMotor(RIGHT_DRIVE_MOTOR);
         touched = false;
