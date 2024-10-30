@@ -15,8 +15,8 @@ ARM_MOTOR = 'B';
 STOP_COLOR = 5;
 
 DRIVE_SPEED = 60;
-LEFT_OFFSET = 0;
-TURN_SPEED = 80;
+LEFT_OFFSET = 5;
+TURN_SPEED = 40;
 
 touched = false;
 
@@ -45,7 +45,7 @@ while 1
         % move right
         brick.MoveMotor(LEFT_DRIVE_MOTOR, TURN_SPEED);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, -TURN_SPEED);
-        pause(1.9);
+        pause(0.9);
         brick.StopMotor(LEFT_DRIVE_MOTOR);
         brick.StopMotor(RIGHT_DRIVE_MOTOR);
         touched = false;
@@ -60,11 +60,11 @@ while 1
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
         pause(0.5);
     elseif distance > 40
-        pause(0.25);
+        %pause(0.);
         % move left
         brick.MoveMotor(LEFT_DRIVE_MOTOR, -TURN_SPEED);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, TURN_SPEED);
-        pause(1.8);
+        pause(0.8);
         brick.StopMotor(LEFT_DRIVE_MOTOR);
         brick.StopMotor(RIGHT_DRIVE_MOTOR);
         pause(0.5);
