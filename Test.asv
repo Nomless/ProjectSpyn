@@ -31,16 +31,16 @@ angle = brick.GyroAngle(2);
 if isnan(angle)
     angle = 0
 end
-error = -90 - angle
-p = 250;
-while abs(error) > 1
+error = 90 - angle
+p = 150;
+while error > 1
     angle = brick.GyroAngle(2)
-    error = -90 - angle
+    error = 90 - angle
     n_error = error / 360;
-    out = clip(p * n_error, -100, 100)
+    out = p * n_error
     brick.MoveMotor(LEFT_DRIVE_MOTOR, out);
     brick.MoveMotor(RIGHT_DRIVE_MOTOR, -out);
-    pause(0.1);
+    pause(0.2);
 end
 pause(0.75);
 brick.StopMotor(LEFT_DRIVE_MOTOR);

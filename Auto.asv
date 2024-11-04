@@ -13,7 +13,7 @@ ARM_MOTOR = 'B';
 STOP_COLOR = 5;
 
 DRIVE_SPEED = 50;
-LEFT_OFFSET = -1;
+LEFT_OFFSET = 2;
 TURN_SPEED = 80;
 
 touched = false;
@@ -45,7 +45,7 @@ function ret = Turn(brick, gyro_port, left_port, right_port, target)
         angle = 0;
     end
     error = target - angle;
-    p = 300;
+    p = 250;
     t = 0;
     while abs(error) > 1 && t <= 2
         angle = brick.GyroAngle(2);
@@ -106,7 +106,7 @@ while 1
         %brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
         %brick.MoveMotor(RIGHT_DRIVE_MOTOR, -DRIVE_SPEED);
         %pause(0.25);
-        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, -90);
+        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, -92);
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
