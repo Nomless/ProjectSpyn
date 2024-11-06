@@ -12,9 +12,9 @@ ARM_MOTOR = 'B';
 % 5 - Red
 STOP_COLOR = 5;
 
-DRIVE_SPEED = 50;
-LEFT_OFFSET = -1;
-TURN_SPEED = 80;
+DRIVE_SPEED = 60;
+LEFT_OFFSET = 5;
+TURN_SPEED = 100;
 
 touched = false;
 
@@ -45,10 +45,11 @@ function ret = Turn(brick, gyro_port, left_port, right_port, target)
         angle = 0;
     end
     error = target - angle;
-    p = 300;
+    p = 600;
+    %i = 0.01;
     t = 0;
     while abs(error) > 1 && t <= 2
-        angle = brick.GyroAngle(2);
+        angle = brick.GyroAngle(gyro_port);
         error = target - angle;
         n_error = error / 360;
         out = clip(p * n_error, -100, 100);
@@ -106,11 +107,11 @@ while 1
         %brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
         %brick.MoveMotor(RIGHT_DRIVE_MOTOR, -DRIVE_SPEED);
         %pause(0.25);
-        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, -90);
+        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, -95);
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
-        for i = 1:25
+        for i = 1:16
             if GetColor(brick, COLOR_PORT) == STOP_COLOR
                 brick.StopMotor(LEFT_DRIVE_MOTOR);
                 brick.StopMotor(RIGHT_DRIVE_MOTOR);
