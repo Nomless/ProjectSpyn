@@ -11,8 +11,8 @@ ARM_MOTOR = 'B';
 % 4 - Yellow
 % 5 - Red
 STOP_COLOR = 5;
-PICKUP_COLOR = 2;
-DROPOFF_COLOR = 3;
+PICKUP_COLOR = 3;
+DROPOFF_COLOR = 2;
 
 DRIVE_SPEED = 60;
 LEFT_OFFSET = 5;
@@ -25,7 +25,7 @@ function ret = GetColor(brick, port)
     red = rgb(1);
     green = rgb(2);
     blue = rgb(3);
-    magnitude = sqrt(red * red + green * green + blue * blue);
+    magnitude = sqrt(double(red * red + green * green + blue * blue));
     if magnitude < 100
         ret = 0;
     elseif red > 100
@@ -34,10 +34,10 @@ function ret = GetColor(brick, port)
         else
             ret = 5;
         end
-    elseif green > 80
-        ret = 3;
     elseif blue > 150
         ret = 2;
+    elseif green > 115
+        ret = 3;
     else
         ret = 0;
     end
@@ -71,7 +71,7 @@ end
 brick.GyroCalibrate(GYRO_PORT);
 brick.SetColorMode(3, 4);
 
-brick.beep();
+%brick.beep();
 
 brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
 brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
@@ -92,7 +92,7 @@ while 1
         continue;
     end
     distance = brick.UltrasonicDist(ULTRASONIC_PORT);
-    color = GetColor(brick, COLOR_PORT);
+    color = GetColor(brick, COLOR_PORT)
     if touched
         % move right
         Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, 90);
@@ -111,8 +111,9 @@ while 1
         elseif color == PICKUP_COLOR
             brick.StopMotor(LEFT_DRIVE_MOTOR);
             brick.StopMotor(RIGHT_DRIVE_MOTOR);
+            pause(1);
             brick.beep();
-            pause(0.5);
+            pause(1);
             brick.beep();
             while GetColor(brick, COLOR_PORT) == PICKUP_COLOR
                 pause(1);
@@ -123,10 +124,11 @@ while 1
         elseif color == DROPOFF_COLOR
             brick.StopMotor(LEFT_DRIVE_MOTOR);
             brick.StopMotor(RIGHT_DRIVE_MOTOR);
+            pause(1);
             brick.beep();
-            pause(0.5);
+            pause(1);
             brick.beep();
-            pause(0.5);
+            pause(1);
             brick.beep();
             while GetColor(brick, COLOR_PORT) == DROPOFF_COLOR
                 pause(1);
