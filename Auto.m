@@ -11,6 +11,8 @@ ARM_MOTOR = 'B';
 % 4 - Yellow
 % 5 - Red
 STOP_COLOR = 5;
+PICKUP_COLOR = 2;
+DROPOFF_COLOR = 3;
 
 DRIVE_SPEED = 60;
 LEFT_OFFSET = 5;
@@ -23,7 +25,10 @@ function ret = GetColor(brick, port)
     red = rgb(1);
     green = rgb(2);
     blue = rgb(3);
-    if red > 100
+    magnitude = sqrt(red * red + green * green + blue * blue);
+    if magnitude < 100
+        ret = 0;
+    elseif red > 100
         if green > 80
             ret = 4;
         else
@@ -38,7 +43,7 @@ function ret = GetColor(brick, port)
     end
 end
 
-function ret = Turn(brick, gyro_port, left_port, right_port, target)
+function Turn(brick, gyro_port, left_port, right_port, target)
     % target angle is cw+
     angle = brick.GyroAngle(gyro_port);
     if isnan(angle)
@@ -86,7 +91,8 @@ while 1
         brick.StopMotor(RIGHT_DRIVE_MOTOR);
         continue;
     end
-    distance = brick.UltrasonicDist(ULTRASONIC_PORT)
+    distance = brick.UltrasonicDist(ULTRASONIC_PORT);
+    color = GetColor(brick, COLOR_PORT);
     if touched
         % move right
         Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, 90);
@@ -94,13 +100,41 @@ while 1
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
-    elseif GetColor(brick, COLOR_PORT) == STOP_COLOR
-        brick.StopMotor(LEFT_DRIVE_MOTOR);
-        brick.StopMotor(RIGHT_DRIVE_MOTOR);
-        pause(2);
-        brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
-        brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
-        pause(0.5);
+    elseif color ~= 0
+        if color == STOP_COLOR
+            brick.StopMotor(LEFT_DRIVE_MOTOR);
+            brick.StopMotor(RIGHT_DRIVE_MOTOR);
+            pause(1);
+            brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
+            brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
+            pause(0.5);
+        elseif color == PICKUP_COLOR
+            brick.StopMotor(LEFT_DRIVE_MOTOR);
+            brick.StopMotor(RIGHT_DRIVE_MOTOR);
+            brick.beep();
+            pause(0.5);
+            brick.beep();
+            while GetColor(brick, COLOR_PORT) == PICKUP_COLOR
+                pause(1);
+            end
+            brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
+            brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
+            pause(0.5);
+        elseif color == DROPOFF_COLOR
+            brick.StopMotor(LEFT_DRIVE_MOTOR);
+            brick.StopMotor(RIGHT_DRIVE_MOTOR);
+            brick.beep();
+            pause(0.5);
+            brick.beep();
+            pause(0.5);
+            brick.beep();
+            while GetColor(brick, COLOR_PORT) == DROPOFF_COLOR
+                pause(1);
+            end
+            brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
+            brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
+            pause(0.5);
+        end
     elseif distance > 40
         %pause(0.);
         % move left
