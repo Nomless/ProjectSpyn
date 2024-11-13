@@ -1,11 +1,6 @@
 global key
 InitKeyboard();
 
-speed = 100;
-
-LEFT_MOTOR = 'D';
-RIGHT_MOTOR = 'C';
-
 while 1
     pause(0.1);
     switch key

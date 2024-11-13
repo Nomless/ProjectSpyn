@@ -4,15 +4,15 @@ GYRO_PORT = 2;
 COLOR_PORT = 3;
 LEFT_DRIVE_MOTOR = 'D';
 RIGHT_DRIVE_MOTOR = 'C';
-ARM_MOTOR = 'A';
+ARM_MOTOR = 'B';
 
 % 2 - Blue
 % 3 - Green
 % 4 - Yellow
 % 5 - Red
 STOP_COLOR = 5;
-PICKUP_COLOR = 2;
-DROPOFF_COLOR = 3;
+PICKUP_COLOR = 3;
+DROPOFF_COLOR = 2;
 
 DRIVE_SPEED = 60;
 LEFT_OFFSET = 5;
@@ -45,7 +45,6 @@ end
 
 function Turn(brick, gyro_port, left_port, right_port, target)
     % target angle is cw+
-    brick.GyroCalibrate(gyro_port);
     angle = brick.GyroAngle(gyro_port);
     if isnan(angle)
         angle = 0;
@@ -69,7 +68,7 @@ function Turn(brick, gyro_port, left_port, right_port, target)
     brick.GyroCalibrate(gyro_port);
 end
 
-function KeyboardControl(brick, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, ARM_MOTOR, speed)
+function KeyboardControl(brick)
     global key
     InitKeyboard();
     
@@ -77,33 +76,42 @@ function KeyboardControl(brick, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, ARM_MOTOR, 
         pause(0.1);
         switch key
             case 'w'
-                brick.MoveMotor(LEFT_DRIVE_MOTOR, speed);
-                brick.MoveMotor(RIGHT_DRIVE_MOTOR, speed);
+                disp("Up");
+                brick.MoveMotor(LEFT_DRIVE_MOTOR, -speed);
+                brick.MoveMotor(RIGHT_MOTOR, -speed);
             case 'a'
-                brick.MoveMotor(LEFT_DRIVE_MOTOR, -speed);
-                brick.MoveMotor(RIGHT_DRIVE_MOTOR, speed);
+                disp('left');
+                brick.MoveMotor(LEFT_MOTOR, speed);
+                brick.MoveMotor(RIGHT_MOTOR, -speed);
             case 's'
-                brick.MoveMotor(LEFT_DRIVE_MOTOR, -speed);
-                brick.MoveMotor(RIGHT_DRIVE_MOTOR, -speed);
+                disp("down");
+                brick.MoveMotor(LEFT_MOTOR, speed);
+                brick.MoveMotor(RIGHT_MOTOR, speed);
             case 'd'
-                brick.MoveMotor(LEFT_DRIVE_MOTOR, speed);
-                brick.MoveMotor(RIGHT_DRIVE_MOTOR, -speed);
-            case 'i'
-                brick.MoveMotor(ARM_MOTOR, -speed / 8);
-            case 'o'
-                brick.MoveMotor(ARM_MOTOR, speed / 8);
+                disp('right');
+                brick.MoveMotor(LEFT_MOTOR, -speed);
+                brick.MoveMotor(RIGHT_MOTOR, speed);
+            case 'q'
+                disp('right');
+                brick.MoveMotor(LEFT_MOTOR, -speed/2);
+                brick.MoveMotor(RIGHT_MOTOR, -speed);
+            case 'e'
+                disp('right');
+                brick.MoveMotor(LEFT_MOTOR, -speed);
+                brick.MoveMotor(RIGHT_MOTOR, -speed/2);
+            case 'uparrow'
+                speed = speed + 10
+            case 'downarrow'
+                speed = speed - 10
             case 0
-                brick.StopMotor(LEFT_DRIVE_MOTOR);
-                brick.StopMotor(RIGHT_DRIVE_MOTOR);
-                brick.StopMotor(ARM_MOTOR);
-                
+                brick.StopMotor(LEFT_MOTOR);
+                brick.StopMotor(RIGHT_MOTOR);
             case 'p'
                 break;
         end
     end
-    brick.StopMotor(LEFT_DRIVE_MOTOR);
-    brick.StopMotor(RIGHT_DRIVE_MOTOR);
-    brick.StopMotor(ARM_MOTOR);
+    brick.StopMotor(LEFT_MOTOR);
+    brick.StopMotor(RIGHT_MOTOR);
     CloseKeyboard();
 end
 
@@ -154,10 +162,9 @@ while 1
             brick.beep();
             pause(1);
             brick.beep();
-            %while GetColor(brick, COLOR_PORT) == PICKUP_COLOR
-                %pause(1);
-            %end
-            KeyboardControl(brick, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, ARM_MOTOR, DRIVE_SPEED)
+            while GetColor(brick, COLOR_PORT) == PICKUP_COLOR
+                pause(1);
+            end
             brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
             brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
             pause(0.5);
@@ -170,10 +177,9 @@ while 1
             brick.beep();
             pause(1);
             brick.beep();
-            %while GetColor(brick, COLOR_PORT) == DROPOFF_COLOR
-                %pause(1);
-            %end
-            KeyboardControl(brick, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, ARM_MOTOR, DRIVE_SPEED)
+            while GetColor(brick, COLOR_PORT) == DROPOFF_COLOR
+                pause(1);
+            end
             brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
             brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
             pause(0.5);
@@ -184,7 +190,7 @@ while 1
         %brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
         %brick.MoveMotor(RIGHT_DRIVE_MOTOR, -DRIVE_SPEED);
         %pause(0.25);
-        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, -89);
+        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, -95);
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
