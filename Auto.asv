@@ -18,7 +18,6 @@ DRIVE_SPEED = 60;
 LEFT_OFFSET = 5;
 TURN_SPEED = 100;
 
-gyro_offset = 0;
 touched = false;
 dropoff = false;
 
@@ -74,14 +73,13 @@ function OldTurn(brick, gyro_port, left_port, right_port, color_port, target)
     brick.GyroCalibrate(gyro_port);
 end
 
-function ret = Turn(brick, gyro_port, left_port, right_port, color_port, target, gyro_offset)
-    ret = gyro_offset - target / 40;
+function Turn(brick, gyro_port, left_port, right_port, color_port, target)
     % target angle is cw+
     initial_angle = brick.GyroAngle(gyro_port);
     while isnan(initial_angle)
         initial_angle = brick.GyroAngle(gyro_port);
     end
-    error = target + gyro_offset;
+    error = target - angle;
     p = 600;
     if GetColor(brick, color_port) > 0
         p = 400;
@@ -90,7 +88,7 @@ function ret = Turn(brick, gyro_port, left_port, right_port, color_port, target,
     t = 0;
     while abs(error) > 1 && t <= 2
         angle = brick.GyroAngle(gyro_port);
-        error = target + gyro_offset - (angle - initial_angle);
+        error = target - angle;
         n_error = error / 360;
         out = clip(p * n_error, -100, 100);
         brick.MoveMotor(left_port, out);
@@ -100,6 +98,7 @@ function ret = Turn(brick, gyro_port, left_port, right_port, color_port, target,
     end
     brick.StopMotor(left_port);
     brick.StopMotor(right_port);
+    brick.GyroCalibrate(gyro_port);
 end
 
 function KeyboardControl(brick, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, ARM_MOTOR, speed)
@@ -167,7 +166,7 @@ while 1
     color = GetColor(brick, COLOR_PORT)
     if touched
         % move right
-        gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, 90, gyro_offset);
+        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, 90);
         touched = false;
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
@@ -218,7 +217,7 @@ while 1
         %brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
         %brick.MoveMotor(RIGHT_DRIVE_MOTOR, -DRIVE_SPEED);
         %pause(0.25);
-        gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, -90, gyro_offset);
+        Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, -92);
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
