@@ -12,10 +12,10 @@ ARM_MOTOR = 'A';
 % 5 - Red
 STOP_COLOR = 5;
 PICKUP_COLOR = 2;
-DROPOFF_COLOR = 4;
+DROPOFF_COLOR = 3;
 
 DRIVE_SPEED = 60;
-LEFT_OFFSET = 5;
+LEFT_OFFSET = 1;
 TURN_SPEED = 100;
 
 gyro_offset = 0;
@@ -75,7 +75,8 @@ function OldTurn(brick, gyro_port, left_port, right_port, color_port, target)
 end
 
 function ret = Turn(brick, gyro_port, left_port, right_port, color_port, target, gyro_offset)
-    ret = gyro_offset - target / 40;
+    %ret = gyro_offset - target / 40;
+    ret = 0;
     % target angle is cw+
     initial_angle = brick.GyroAngle(gyro_port);
     while isnan(initial_angle)
@@ -91,6 +92,34 @@ function ret = Turn(brick, gyro_port, left_port, right_port, color_port, target,
     while abs(error) > 1 && t <= 2
         angle = brick.GyroAngle(gyro_port);
         error = target + gyro_offset - (angle - initial_angle);
+        n_error = error / 360;
+        out = clip(p * n_error, -100, 100);
+        brick.MoveMotor(left_port, out);
+        brick.MoveMotor(right_port, -out);
+        t = t + 0.1;
+        pause(0.1);
+    end
+    brick.StopMotor(left_port);
+    brick.StopMotor(right_port);
+end
+
+expected = 0;
+function TurnFixed(brick, gyro_port, left_port, right_port, color_port, target)
+    % target angle is cw+
+    initial_angle = brick.GyroAngle(gyro_port);
+    while isnan(initial_angle)
+        initial_angle = brick.GyroAngle(gyro_port);
+    end
+    error = target - initial_angle;
+    p = 600;
+    if GetColor(brick, color_port) > 0
+        p = 400;
+    end
+    %i = 0.01;
+    t = 0;
+    while abs(error) > 1 && t <= 2
+        angle = brick.GyroAngle(gyro_port)
+        error = target - angle;
         n_error = error / 360;
         out = clip(p * n_error, -100, 100);
         brick.MoveMotor(left_port, out);
@@ -148,6 +177,8 @@ brick.SetColorMode(3, 4);
 brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
 brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
 
+last_turn = 0;
+
 while 1
     if isnan(brick.TouchPressed(TOUCH_PORT))
         disp("NaN???");
@@ -164,14 +195,17 @@ while 1
         continue;
     end
     distance = brick.UltrasonicDist(ULTRASONIC_PORT);
-    color = GetColor(brick, COLOR_PORT)
+    color = GetColor(brick, COLOR_PORT);
     if touched
         % move right
-        gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, 90, gyro_offset);
+        %gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, 90, gyro_offset);
+        expected = expected + 90;
+        TurnFixed(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, expected);
         touched = false;
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
+        last_turn = 0;
     elseif color ~= 0
         if color == STOP_COLOR
             brick.StopMotor(LEFT_DRIVE_MOTOR);
@@ -180,6 +214,7 @@ while 1
             brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
             brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
             pause(0.5);
+            last_turn = 0;
         elseif color == PICKUP_COLOR
             brick.StopMotor(LEFT_DRIVE_MOTOR);
             brick.StopMotor(RIGHT_DRIVE_MOTOR);
@@ -187,6 +222,7 @@ while 1
             brick.beep();
             pause(1);
             brick.beep();
+            expected = expected + 180;
             %while GetColor(brick, COLOR_PORT) == PICKUP_COLOR
                 %pause(1);
             %end
@@ -195,6 +231,7 @@ while 1
             brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
             dropoff = true;
             pause(0.5);
+            last_turn = 0;
         elseif color == DROPOFF_COLOR && dropoff == true
             brick.StopMotor(LEFT_DRIVE_MOTOR);
             brick.StopMotor(RIGHT_DRIVE_MOTOR);
@@ -211,14 +248,14 @@ while 1
             brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
             brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
             pause(0.5);
+            last_turn = 0;
         end
-    elseif distance > 40
-        %pause(0.);
+    elseif distance > 60
         % move left
-        %brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
-        %brick.MoveMotor(RIGHT_DRIVE_MOTOR, -DRIVE_SPEED);
-        %pause(0.25);
-        gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, -90, gyro_offset);
+        %gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR,
+        %RIGHT_DRIVE_MOTOR, COLOR_PORT, -90, gyro_offset);\
+        expected = expected - 90;
+        TurnFixed(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, expected);
         pause(0.5);
         brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
         brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
@@ -233,7 +270,20 @@ while 1
             end
             pause(0.1);
         end
+        last_turn = 0;
+    elseif last_turn > 20
+        brick.MoveMotor(LEFT_DRIVE_MOTOR, -DRIVE_SPEED);
+        brick.MoveMotor(RIGHT_DRIVE_MOTOR, -DRIVE_SPEED);
+        pause(0.75);
+        brick.StopMotor(LEFT_DRIVE_MOTOR);
+        brick.StopMotor(RIGHT_DRIVE_MOTOR);
+        %gyro_offset = Turn(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, 45, gyro_offset);
+        expected = expected + 90;
+        TurnFixed(brick, GYRO_PORT, LEFT_DRIVE_MOTOR, RIGHT_DRIVE_MOTOR, COLOR_PORT, expected);
+        brick.MoveMotor(LEFT_DRIVE_MOTOR, DRIVE_SPEED + LEFT_OFFSET);
+        brick.MoveMotor(RIGHT_DRIVE_MOTOR, DRIVE_SPEED);
+        last_turn = 0;
     end
-    
+    last_turn = last_turn + 0.5;
     pause(0.1);
 end
